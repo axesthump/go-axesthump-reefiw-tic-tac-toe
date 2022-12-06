@@ -8,8 +8,8 @@ const (
 )
 
 type User struct {
-	id         int
-	playerType PlayerType
+	ID         int
+	PlayerType PlayerType
 }
 
 type Storage interface {
