@@ -6,14 +6,15 @@ import (
 )
 
 type Map struct {
-	height      int
-	width       int
-	imageHeight int
-	imageWidth  int
-	image       [][]rune
-	xRune       rune
-	oRune       rune
-	winCond     int
+	height           int
+	width            int
+	imageHeight      int
+	imageWidth       int
+	image            [][]rune
+	xRune            rune
+	oRune            rune
+	winCond          int
+	LastPlayerSymbol rune
 }
 
 func InitMap(size, winCond int) (*Map, error) {
@@ -54,10 +55,10 @@ func (m *Map) PrintMap() {
 	}
 }
 
-func (m *Map) getMapForResponse() []string {
-	result := make([]string, m.height, m.height)
-	for i := 0; i < m.height; i++ {
-		for j := 0; j < m.width; j++ {
+func (m *Map) GetMapForResponse() []string {
+	result := make([]string, m.imageHeight, m.imageHeight)
+	for i := 0; i < m.imageHeight; i++ {
+		for j := 0; j < m.imageWidth; j++ {
 			result[i] += string(m.image[i][j])
 		}
 	}
@@ -69,6 +70,7 @@ func (m *Map) Move(yCord int, xCord int, symb rune) (bool, error) {
 		return false, err
 	}
 	m.image[getImageYCord(yCord)][getImageXCord(xCord)] = symb
+	m.LastPlayerSymbol = symb
 	return m.isWin(yCord, xCord, symb), nil
 }
 
