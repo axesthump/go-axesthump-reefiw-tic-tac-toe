@@ -54,6 +54,16 @@ func (m *Map) PrintMap() {
 	}
 }
 
+func (m *Map) getMapForResponse() []string {
+	result := make([]string, m.height, m.height)
+	for i := 0; i < m.height; i++ {
+		for j := 0; j < m.width; j++ {
+			result[i] += string(m.image[i][j])
+		}
+	}
+	return result
+}
+
 func (m *Map) Move(yCord int, xCord int, symb rune) (bool, error) {
 	if err := m.isValidMove(yCord, xCord); err != nil {
 		return false, err
