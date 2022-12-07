@@ -14,13 +14,15 @@ import (
 )
 
 type GameModel struct {
-	Map []string
+	Map        []string
+	WinMessage string
 }
 
 var gameTemplate = template.Must(
 	template.New("data").Parse(
 		`
 <h1>Game:</h1>
+<h2>{{ .WinMessage}}</h2>
 {{range .Map}}
      {{.}}
 	<br>
@@ -44,22 +46,23 @@ var gameTemplate = template.Must(
 )
 
 type AppHandler struct {
-	gameField *game.Map
-	Router    chi.Router
-	storage   storage.Storage
+	gameField  *game.Map
+	Router     chi.Router
+	storage    storage.Storage
+	WinMessage string
 }
 
-func NewAppHandler() *AppHandler {
+func NewAppHandler() (*AppHandler, error) {
 	gameMap, err := game.InitMap(3, 3)
 	if err != nil {
-		panic(err) //todo refactor
+		return nil, err
 	}
 	handler := &AppHandler{
 		gameField: gameMap,
 		storage:   storage.NewInMemoryStorage(),
 	}
 	createRouter(handler)
-	return handler
+	return handler, nil
 }
 
 func createRouter(h *AppHandler) {
@@ -85,7 +88,7 @@ func (h *AppHandler) gamePage(w http.ResponseWriter, r *http.Request) {
 		h.storage.AddUser(int(id))
 	}
 	gameModel := GameModel{
-		h.gameField.GetMapForResponse(),
+		Map: h.gameField.GetMapForResponse(),
 	}
 	gameTemplate.Execute(w, gameModel)
 }
@@ -99,19 +102,29 @@ func (h *AppHandler) playerMove(w http.ResponseWriter, r *http.Request) {
 		log.Println(err.Error())
 		return
 	}
-	xInt, _ := strconv.Atoi(x) //todo
-	yInt, _ := strconv.Atoi(y) //todo
+	xInt, err := strconv.Atoi(x)
+	if err != nil {
+		return //todo
+	}
+	yInt, err := strconv.Atoi(y)
+	if err != nil {
+		return //todo
+	}
 	if user.PlayerType == storage.OPlayer {
-		if h.gameField.LastPlayerSymbol != 'o' { // todo
-			win, _ := h.gameField.Move(yInt, xInt, 'o')
-			log.Println(win)
+		if h.gameField.LastPlayerSymbol != 'o' {
+			win, _ := h.gameField.Move(yInt, xInt, 'o') //todo
+			if win {
+				h.WinMessage = "Player o win!"
+			}
 		}
 	} else {
-		if h.gameField.LastPlayerSymbol != 'x' { //todo
-			win, _ := h.gameField.Move(yInt, xInt, 'x')
-			log.Println(win)
+		if h.gameField.LastPlayerSymbol != 'x' {
+			win, _ := h.gameField.Move(yInt, xInt, 'x') //todo
+			if win {
+				h.WinMessage = "Player x win!"
+			}
 		}
 	}
 
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 }
