@@ -96,13 +96,56 @@ func (m *Map) isWin(yCord int, xCord int, symb rune) bool {
 	if counter == m.winCond {
 		return true
 	}
+	return m.checkDiagonal(yCord, xCord, symb)
+}
 
-	//todo: check diagonal
-	counter = 0
+func (m *Map) checkDiagonal(yCord, xCord int, symb rune) bool {
+	var leftUpCount, leftDownCount, rightUpCount, rightDownCount int
+	leftUpPossibly := true
+	leftDownPossibly := true
+	rightUpPossibly := true
+	rightDownPossibly := true
+
+	for i := 1; i <= m.width; i++ {
+		if leftUpPossibly && m.isRuneEquals(yCord-i, xCord-i, symb) {
+			leftUpCount++
+		} else {
+			leftUpPossibly = false
+		}
+
+		if leftDownPossibly && m.isRuneEquals(yCord+i, xCord+i, symb) {
+			leftDownCount++
+		} else {
+			leftDownPossibly = false
+		}
+
+		if rightUpPossibly && m.isRuneEquals(yCord-i, xCord+i, symb) {
+			rightUpCount++
+		} else {
+			rightUpPossibly = false
+		}
+
+		if rightDownPossibly && m.isRuneEquals(yCord+i, xCord-i, symb) {
+			rightDownCount++
+		} else {
+			rightDownPossibly = false
+		}
+	}
+	if leftUpCount+rightDownCount+1 >= m.winCond {
+		return true
+	}
+
+	if rightUpCount+rightDownCount+1 >= m.winCond {
+		return true
+	}
 	return false
 }
 
 func (m *Map) isRuneEquals(yCord, xCord int, symb rune) bool {
+	if getImageYCord(yCord) < 0 || getImageYCord(yCord) >= m.imageHeight ||
+		getImageXCord(xCord) < 0 || getImageXCord(xCord) >= m.imageWidth {
+		return false
+	}
 	return m.image[getImageYCord(yCord)][getImageXCord(xCord)] == symb
 }
 
