@@ -9,11 +9,18 @@ import (
 )
 
 func main() {
-	conf := config.NewAppConfig()
-	log.Printf("Start listen server at %s\n", conf.Port)
-	err := http.ListenAndServe(fmt.Sprintf(":%s", conf.Port), conf.Handler.Router)
+	conf, err := config.NewAppConfig()
 	if err != nil {
-		log.Printf("Cant start server... %s\n", err.Error())
-		os.Exit(1)
+		exit(err.Error())
 	}
+	log.Printf("Start listen server at %s\n", conf.Port)
+	err = http.ListenAndServe(fmt.Sprintf(":%s", conf.Port), conf.Handler.Router)
+	if err != nil {
+		exit(err.Error())
+	}
+}
+
+func exit(msg string) {
+	fmt.Println(msg)
+	os.Exit(1)
 }
